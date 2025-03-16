@@ -82,7 +82,7 @@ Arduino를 이용하여 신호등(교통신호) 시스템을 구현하고, p5.js
 
 ---
 
-##### 6. 구축 및 실행 방법
+##### 구축 및 실행 방법
 
 
 1. Arduino 코드 업로드
@@ -95,4 +95,14 @@ Arduino를 이용하여 신호등(교통신호) 시스템을 구현하고, p5.js
 3. 테스트 및 검증:
    - 각 버튼(버튼 1, 2, 3)을 눌러 모드 전환이 올바르게 이루어지는지 확인한다.
    - Arduino에서 전송되는 상태 메시지에 따라 p5.js 화면에 LED 상태와 모드가 올바르게 표시되는지 점검한다.
+
+---
+
+##### 짜잔!
+![image](https://github.com/user-attachments/assets/f760d4b2-e780-4c1b-86e7-eefae111836b)
+![image](https://github.com/user-attachments/assets/449f2ab9-f98e-4378-bf01-5dc195b33671)
+![image](https://github.com/user-attachments/assets/4d744c83-ad26-4fc0-b0c1-f5dae4975c01)
+![image](https://github.com/user-attachments/assets/440e9393-fd68-4903-9011-ea6d910c89ef)
+
+
 

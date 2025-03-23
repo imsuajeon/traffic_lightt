@@ -263,11 +263,15 @@ void loop() {
       redState = true; yellowState = false; greenState = false;
       sendState();
       Serial.println("Manual Mode: RED_ON, YELLOW_OFF, GREEN_OFF");
+      Serial.print("MODE ");
+      Serial.println("EMERGENCY");
     } else {
       analogWrite(redPin, 0);
       redState = false;
       sendState();
       Serial.println("Manual Mode Off: RED_OFF");
+      Serial.print("MODE ");
+      Serial.println("NORMAL");
       red.restartDelayed();
     }
   }
@@ -278,6 +282,8 @@ void loop() {
     if (blinkMode) {
       red.disable(); yellow.disable(); green.disable();
       greenBlink.disable(); yellowAfterBlink.disable();
+      Serial.print("MODE ");
+      Serial.println("BLINKING");
       while (blinkMode) {
         // 모두 켜기
         analogWrite(redPin, brightness);
@@ -312,6 +318,8 @@ void loop() {
       redState = false; yellowState = false; greenState = false;
       sendState();
       Serial.println("realOFFF");
+      Serial.print("MODE ");
+      Serial.println("NORMAL");
       red.restartDelayed();
     }
   }
@@ -322,6 +330,8 @@ void loop() {
     if (trafficLightOn) {
       sendState();
       Serial.println("ONNNN");
+      Serial.print("MODE ");
+      Serial.println("NORMAL");
       red.restartDelayed();
     } else {
       red.disable(); yellow.disable(); green.disable();
@@ -329,6 +339,8 @@ void loop() {
       analogWrite(redPin, 0);
       analogWrite(yellowPin, 0);
       analogWrite(greenPin, 0);
+      Serial.print("MODE ");
+      Serial.println("ON_OFF");
       redState = false; yellowState = false; greenState = false;
       sendState();
       Serial.println("OFFWhite");

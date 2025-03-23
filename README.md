@@ -12,11 +12,9 @@ else if (line.startsWith("MODE:")) {              // 모드 변경
       currentMode = modeCmd;
       Serial.print("Mode received: ");
       Serial.println(modeCmd);
-      
       // p5.js에 모드 업데이트를 위한 메시지 전송
       Serial.print("MODE ");
       Serial.println(currentMode);
-      
       if (modeCmd == "NORMAL") {
         trafficLightOn = true;
         toggleMode = false;
@@ -103,6 +101,7 @@ else if (line.startsWith("MODE:")) {              // 모드 변경
         Serial.println("Switched to OFF mode.");
       }
     }
+    
 시리얼 명령어로 모드 변경을 처리하는 코드를 추가했으며 MODE:로 시작하는 문자열이 있으면 모드 변경을 실시한다. 모드벼 처리하는 조건문을 추가했다. 사실 그전 코드 그대로 갖고와서 시리얼 명령어만 바꿨다. (핸드포즈에서 시리얼 보내면 여기를 거쳐서 모드가 결정된다.)
 
 ---

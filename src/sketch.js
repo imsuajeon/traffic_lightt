@@ -119,7 +119,7 @@ function draw() {
         let val = min(redSlider.value() + 100, parseInt(redSlider.elt.max));            // 빨간색 시간을 늘림
         redSlider.value(val); sendRedTime();
         console.log("검지 새끼 위");
-      } else if (isPalmUp(hand)) {                                                             // 손바닥을 위로 올리면
+      } else if (isPalmUp(hand)) {                                                       // 손바닥을 위로 올리면
         let val = min(greenSlider.value() + 100, parseInt(greenSlider.elt.max));        // 초록색 시간을 늘림
         greenSlider.value(val); sendGreenTime();                                        // 시리얼로 전송      
         console.log("손바닥 위");                                                        // 콘솔에 로그 출력

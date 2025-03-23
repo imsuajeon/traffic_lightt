@@ -1,7 +1,7 @@
 ### 수아의 우당탕탕 신호등!
 ---
 ##### 이번주 수아의 유튭:
-
+https://youtu.be/dlfvfT4cCE8?si=a7V1P2BrqzcfJUys
 
 ---
 ##### 아두이노 추가 코드

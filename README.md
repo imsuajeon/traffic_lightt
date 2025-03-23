@@ -122,10 +122,12 @@ p5.js에서 웹 브라우저와 Arduino 간 시리얼 통신을 가능하게 해
 
 웹캠으로 손 인식하고 Handpose 모델로 손가락 keypoint 받아오는용
 
+```
 image(video, camX, camY, camW, camH);
       fill(255, 0, 0);
       noStroke();
-        
+```
+      
 화면에 뜨는 카메라
 
   for (let i = 0; i < hands.length; i++) {

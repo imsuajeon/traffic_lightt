@@ -226,12 +226,14 @@ function detectModeGesture(hand) {
 
 ---
 ##### 제스쳐 설명
+|![image](https://github.com/user-attachments/assets/6052f0a7-fffe-4c73-a3a5-c9e54a49f5a2)|![image](https://github.com/user-attachments/assets/2066722f-f9ba-44cc-b0de-ab7ef4818223)|![image](https://github.com/user-attachments/assets/b229b472-6ade-4e6f-99e0-e3e64b84b33a)|![image](https://github.com/user-attachments/assets/0f05ebf9-d709-493d-a539-d87d168cc07c)|
+|----------------------------|-------------------------------|-----------------------------|-------------------------------------|
+|신호등모드|Emergency 모드|blink 모드|On/Off
 
-![image](https://github.com/user-attachments/assets/6052f0a7-fffe-4c73-a3a5-c9e54a49f5a2)
 신호등모드
-![image](https://github.com/user-attachments/assets/2066722f-f9ba-44cc-b0de-ab7ef4818223)
+
 Emergency 모드
-![image](https://github.com/user-attachments/assets/b229b472-6ade-4e6f-99e0-e3e64b84b33a)
+
 blink 모드
 ![image](https://github.com/user-attachments/assets/0f05ebf9-d709-493d-a539-d87d168cc07c)
 On/Off

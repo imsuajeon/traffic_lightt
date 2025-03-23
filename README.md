@@ -182,39 +182,39 @@ p5.js에서 웹 브라우저와 Arduino 간 시리얼 통신을 가능하게 해
       제스쳐로 슬라이더 바꿀때 100씩 바뀜
       
       function detectModeGesture(hand) {                                                      
-  const lm = hand.landmarks;                                                            // 손의 랜드마크 정보
-  const isUp = (tip, dip) => lm[tip][1] < lm[dip][1];                                   // 손가락이 펴져있는지 확인하는 함수
+  const lm = hand.landmarks;                             // 손의 랜드마크 정보
+  const isUp = (tip, dip) => lm[tip][1] < lm[dip][1];    // 손가락이 펴져있는지 확인하는 함수
   const idx = isUp(8, 6), mid = isUp(12, 10), rng = isUp(16, 14), pink = isUp(20, 18);  // 각 손가락의 상태를 저장
-  if (!idx && !mid && !rng && !pink) return "NORMAL";                                   // 모든 손가락이 접혀있으면 NORMAL
-  if (idx && !mid && !rng && !pink) return "EMERGENCY";                                 // 검지만 펴져있으면 EMERGENCY
-  if (idx && mid && !rng && !pink) return "BLINKING";                                   // 검지와 중지만 펴져있으면 BLINKING
-  if (idx && mid && rng && !pink) return "ON_OFF";                                      // 검지, 중지, 약지가 펴져있으면 ON_OFF
+  if (!idx && !mid && !rng && !pink) return "NORMAL";   // 모든 손가락이 접혀있으면 NORMAL
+  if (idx && !mid && !rng && !pink) return "EMERGENCY"; // 검지만 펴져있으면 EMERGENCY
+  if (idx && mid && !rng && !pink) return "BLINKING";   // 검지와 중지만 펴져있으면 BLINKING
+  if (idx && mid && rng && !pink) return "ON_OFF";      // 검지, 중지, 약지가 펴져있으면 ON_OFF
   return null;
 }
 
 모드 제스처 인식 함수
 
-      function isIndexandPinkyExtended(hand) {                                                // 검지와 새끼 위로로 핀 함수      
+      function isIndexandPinkyExtended(hand) {    // 검지와 새끼 위로로 핀 함수      
   let lm = hand.landmarks;
   return (lm[8][1] < lm[6][1] && lm[12][1] > lm[10][1] && lm[16][1] > lm[14][1] && lm[20][1] < lm[18][1]);
 }
-      function isThumbandIndexExtended(hand) {                                                    // 검지와 새끼 아래로 핀 함수
+      function isThumbandIndexExtended(hand) {   // 검지와 새끼 아래로 핀 함수
   let lm = hand.landmarks;
   return (lm[16][1] > lm[14][1] && lm[12][1] > lm[10][1] && lm[8][1] < lm[6][1] && lm[20][1] > lm[18][1] && lm[4][1] < lm[3][1]);
 }
-      function isThumbExtended(hand) {                                                        // 엄지 위로 핀 함수
+      function isThumbExtended(hand) {           // 엄지 위로 핀 함수
   let lm = hand.landmarks;
   return (lm[4][1] < lm[3][1] && lm[8][1] > lm[6][1] && lm[12][1] > lm[10][1] && lm[16][1] > lm[14][1] && lm[20][1] < lm[18][1]);
 }
-      function isThumbDown(hand) {                                                            // 엄지 아래로 핀 함수
+      function isThumbDown(hand) {               // 엄지 아래로 핀 함수
   let lm = hand.landmarks;
   return lm[4][1] > lm[3][1];
 }
-      function isPalmUp(hand) {                                                               // 손바닥 위로
+      function isPalmUp(hand) {                  // 손바닥 위로
   let lm = hand.landmarks;
   return (lm[4][1] < lm[3][1] && lm[8][1] < lm[6][1] && lm[12][1] < lm[10][1] && lm[16][1] < lm[14][1] && lm[20][1] < lm[18][1]);
 }
-      function isPalmDown(hand) {                                                             // 손바닥 아래로
+      function isPalmDown(hand) {                // 손바닥 아래로
   let lm = hand.landmarks;
   return (lm[4][1] > lm[3][1] && lm[8][1] > lm[6][1] && lm[12][1] > lm[10][1] && lm[16][1] > lm[14][1] && lm[20][1] > lm[18][1]);
 }

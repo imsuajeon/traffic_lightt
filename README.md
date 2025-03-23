@@ -129,7 +129,7 @@ image(video, camX, camY, camW, camH);
 ```
       
 화면에 뜨는 카메라
-
+```
   for (let i = 0; i < hands.length; i++) {
     for (let [xVal, yVal] of hands[i].landmarks) {
       let flippedX = camX + (video.width - xVal);
@@ -137,9 +137,10 @@ image(video, camX, camY, camW, camH);
       circle(flippedX, drawY, 10);
     }
   }
-  
-손 인식 결과
+```
 
+손 인식 결과
+```
 if (hands.length > 0 && millis() > gestureCooldown) {
     let newMode = detectModeGesture(hands[0]);
     if (newMode && newMode !== currentMode) {
@@ -149,9 +150,9 @@ if (hands.length > 0 && millis() > gestureCooldown) {
       console.log("Mode changed via gesture:", newMode);
           }
         }
-        
+   ```     
 모드 변경을 위한 제스처
-  
+  ```
   if (hands.length > 0 && millis() > sliderGestureCooldown) {
     for (let hand of hands) {
     if (isThumbandIndexExtended(hand)) {                                              // 엄지 검지 위로 피면
@@ -179,10 +180,10 @@ if (hands.length > 0 && millis() > gestureCooldown) {
         greenSlider.value(val); sendGreenTime();                                        // 시리얼로 전송      
         console.log("손바닥 위");                                                        // 콘솔에 로그 출력
       } 
-      
+     ``` 
 슬라이드 제어
 제스쳐로 슬라이더 바꿀때 100씩 바뀜
-      
+      ```
 function detectModeGesture(hand) {                                                      
   const lm = hand.landmarks;                             // 손의 랜드마크 정보
   const isUp = (tip, dip) => lm[tip][1] < lm[dip][1];    // 손가락이 펴져있는지 확인하는 함수
@@ -193,9 +194,9 @@ function detectModeGesture(hand) {
   if (idx && mid && rng && !pink) return "ON_OFF";      // 검지, 중지, 약지가 펴져있으면 ON_OFF
   return null;
 }
-
+```
 모드 제스처 인식 함수
-
+```
       function isIndexandPinkyExtended(hand) {    // 검지와 새끼 위로로 핀 함수      
   let lm = hand.landmarks;
   return (lm[8][1] < lm[6][1] && lm[12][1] > lm[10][1] && lm[16][1] > lm[14][1] && lm[20][1] < lm[18][1]);
@@ -220,7 +221,7 @@ function detectModeGesture(hand) {
   let lm = hand.landmarks;
   return (lm[4][1] > lm[3][1] && lm[8][1] > lm[6][1] && lm[12][1] > lm[10][1] && lm[16][1] > lm[14][1] && lm[20][1] > lm[18][1]);
 }
-
+```
 슬라이더 제스쳐 인식 함수
 
 ---

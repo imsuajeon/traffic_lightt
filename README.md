@@ -150,9 +150,9 @@ if (hands.length > 0 && millis() > gestureCooldown) {
       console.log("Mode changed via gesture:", newMode);
           }
         }
-   ```     
+```     
 모드 변경을 위한 제스처
-  ```
+```
   if (hands.length > 0 && millis() > sliderGestureCooldown) {
     for (let hand of hands) {
     if (isThumbandIndexExtended(hand)) {                                              // 엄지 검지 위로 피면
@@ -180,10 +180,10 @@ if (hands.length > 0 && millis() > gestureCooldown) {
         greenSlider.value(val); sendGreenTime();                                        // 시리얼로 전송      
         console.log("손바닥 위");                                                        // 콘솔에 로그 출력
       } 
-     ``` 
+``` 
 슬라이드 제어
 제스쳐로 슬라이더 바꿀때 100씩 바뀜
-      ```
+```
 function detectModeGesture(hand) {                                                      
   const lm = hand.landmarks;                             // 손의 랜드마크 정보
   const isUp = (tip, dip) => lm[tip][1] < lm[dip][1];    // 손가락이 펴져있는지 확인하는 함수

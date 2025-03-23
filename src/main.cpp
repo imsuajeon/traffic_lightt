@@ -16,7 +16,7 @@ int RED_TIME = 2000;
 int YELLOW_TIME = 500;  
 int GREEN_TIME = 2000;  
 int ALL_BLINK_INTERVAL = 500;  // 깜빡임 간격 (2번 버튼)
-const int GREEN_BLINK_INTERVAL = 333; // 제가 이해한 시간이 맞나요?
+const int GREEN_BLINK_INTERVAL = 333; // (예상 blink 시간)
 const int GREEN_BLINK_COUNT = 3;
 
 // TaskScheduler 및 밝기 변수
@@ -28,7 +28,10 @@ bool redState = false;
 bool yellowState = false;
 bool greenState = false;
 
-// LED 상태를 전송 (밝기는 별도 메시지로 보냄)
+// 현재 모드 문자열 (Serial 전송 및 확인용)
+String currentMode = "신호등";
+
+// LED 상태를 전송 
 void sendState() {
   Serial.print("STATE ");
   Serial.print(redState ? "1" : "0");
@@ -78,7 +81,7 @@ void setup() {
   pinMode(button3, INPUT_PULLUP);
   pinMode(potPin, INPUT);
 
-  // 각 버튼에 대한 핀 체인지 인터럽트랄까 (Falling Edge)
+  // 각 버튼에 대한 핀 체인지 인터럽트 (Falling Edge)
   attachPCINT(digitalPinToPCINT(button1), handleButtonPress1, FALLING);
   attachPCINT(digitalPinToPCINT(button2), handleButtonPress2, FALLING);
   attachPCINT(digitalPinToPCINT(button3), handleButtonPress3, FALLING);
@@ -95,19 +98,20 @@ void setup() {
 void loop() {
   // p5.js에서 들어오는 시리얼 데이터 처리
   if (Serial.available() > 0) {
-    String line = Serial.readStringUntil('\n'); // 한 줄 읽기
+    String line = Serial.readStringUntil('\n');
     line.trim();
-    if (line.startsWith("RED ")) { // RED 문구가 있으면
-      String numStr = line.substring(4); // 숫자만 꺼내서
-      int val = numStr.toInt(); // 정수로
+    
+    if (line.startsWith("RED ")) {                    // RED 시간 변경  
+      String numStr = line.substring(4);
+      int val = numStr.toInt();
       if (val > 0) {
-        RED_TIME = val; // 그걸 이제 RED_TIME으로
+        RED_TIME = val;
         red.setInterval(RED_TIME);
         Serial.print("Updated RED_TIME=");
         Serial.println(RED_TIME);
       }
     }
-    else if (line.startsWith("YELLOW ")) { // 이하 동일
+    else if (line.startsWith("YELLOW ")) {            // YELLOW 시간 변경
       String numStr = line.substring(7);
       int val = numStr.toInt();
       if (val > 0) {
@@ -118,7 +122,7 @@ void loop() {
         Serial.println(YELLOW_TIME);
       }
     }
-    else if (line.startsWith("GREEN ")) { // 이하 동일
+    else if (line.startsWith("GREEN ")) {             // GREEN 시간 변경
       String numStr = line.substring(6);
       int val = numStr.toInt();
       if (val > 0) {
@@ -128,7 +132,106 @@ void loop() {
         Serial.println(GREEN_TIME);
       }
     }
-    else { // 메시지가 없다면 깜빡임으로
+    else if (line.startsWith("MODE:")) {              // 모드 변경
+      String modeCmd = line.substring(5);
+      modeCmd.trim();
+      currentMode = modeCmd;
+      Serial.print("Mode received: ");
+      Serial.println(modeCmd);
+      
+      // p5.js에 모드 업데이트를 위한 메시지 전송
+      Serial.print("MODE ");
+      Serial.println(currentMode);
+      
+      if (modeCmd == "NORMAL") {
+        trafficLightOn = true;
+        toggleMode = false;
+        blinkMode = false;
+        red.restartDelayed();
+        Serial.println("Switched to NORMAL mode.");
+      }
+      else if (modeCmd == "EMERGENCY") {
+        trafficLightOn = false;
+        toggleMode = true;
+        blinkMode = false;
+        red.disable();
+        yellow.disable();
+        green.disable();
+        greenBlink.disable();
+        yellowAfterBlink.disable();
+        analogWrite(redPin, brightness);
+        analogWrite(yellowPin, 0);
+        analogWrite(greenPin, 0);
+        redState = true;
+        yellowState = false;
+        greenState = false;
+        sendState();
+        Serial.print("MODE ");
+        Serial.println(currentMode);  
+        Serial.println("Manual Mode: RED_ON, YELLOW_OFF, GREEN_OFF");
+      }
+      else if (modeCmd == "BLINKING") {
+        trafficLightOn = false;
+        blinkMode = true;
+        red.disable();
+        yellow.disable();
+        green.disable();
+        greenBlink.disable();
+        yellowAfterBlink.disable();
+        Serial.println("Switched to BLINKING mode.");
+        // blinking 모드 처리는 비차단 방식으로 개선하는 것이 좋습니다.
+        while (blinkMode) {
+          analogWrite(redPin, brightness);
+          analogWrite(yellowPin, brightness);
+          analogWrite(greenPin, brightness);
+          redState = true;
+          yellowState = true;
+          greenState = true;
+          sendState();
+          Serial.println("ALL_ON");
+          delay(ALL_BLINK_INTERVAL);
+          if (Serial.available() > 0) {
+            blinkMode = false;
+            break;
+          }
+          analogWrite(redPin, 0);
+          analogWrite(yellowPin, 0);
+          analogWrite(greenPin, 0);
+          redState = false;
+          yellowState = false;
+          greenState = false;
+          sendState();
+          Serial.println("ALL_OFF");
+          delay(ALL_BLINK_INTERVAL);
+          if (Serial.available() > 0) {
+            blinkMode = false;
+            break;
+          }
+        }
+        Serial.println("Exiting BLINKING mode.");
+      }
+      else if (modeCmd == "ON_OFF") {
+        trafficLightOn = false;
+        red.disable();
+        yellow.disable();
+        green.disable();
+        greenBlink.disable();
+        yellowAfterBlink.disable();
+        analogWrite(redPin, 0);
+        analogWrite(yellowPin, 0);
+        analogWrite(greenPin, 0);
+        redState = false;
+        yellowState = false;
+        greenState = false;
+        sendState();
+        Serial.print("MODE ");
+        Serial.println(currentMode);  // 버튼처럼 모드 메시지 재전송
+        Serial.println("Switched to OFF mode.");
+      }
+    }
+    
+    
+    else { // 숫자 메시지: 깜빡임 간격 변경
       int incomingInterval = line.toInt();
       if (incomingInterval > 0) {
         ALL_BLINK_INTERVAL = incomingInterval;
@@ -137,7 +240,7 @@ void loop() {
       }
     }
   }
-
+  
   // 가변저항 읽어서 밝기 설정
   int potValue = analogRead(potPin);
   delay(100);
@@ -147,38 +250,36 @@ void loop() {
   Serial.print("BRIGHTNESS ");
   Serial.println(brightness);
 
-  // 대망의 버튼
-  if (buttonPressed1) { // 1번 버튼 눌리면
+  // 버튼 처리
+  if (buttonPressed1) {
     buttonPressed1 = false;
     toggleMode = !toggleMode;
     if (toggleMode) {
       red.disable(); yellow.disable(); green.disable();
-      greenBlink.disable(); yellowAfterBlink.disable(); // 모든 task 죽여버리고
-      // 빨간불만 켜줌
+      greenBlink.disable(); yellowAfterBlink.disable();
       analogWrite(redPin, brightness); 
       analogWrite(yellowPin, 0);
       analogWrite(greenPin, 0); 
       redState = true; yellowState = false; greenState = false;
       sendState();
       Serial.println("Manual Mode: RED_ON, YELLOW_OFF, GREEN_OFF");
-    } else { // 한 번 더 눌리면
+    } else {
       analogWrite(redPin, 0);
-      redState = false; // 빨간불 꺼짐
+      redState = false;
       sendState();
       Serial.println("Manual Mode Off: RED_OFF");
-      red.restartDelayed(); // 그리고 다시 신호등 시작작
+      red.restartDelayed();
     }
   }
 
-  if (buttonPressed2) { // 2번 버튼 눌리면
+  if (buttonPressed2) {
     buttonPressed2 = false;
     blinkMode = !blinkMode;
     if (blinkMode) {
       red.disable(); yellow.disable(); green.disable();
-      greenBlink.disable(); yellowAfterBlink.disable(); // 모든 task 죽여버리고
-
+      greenBlink.disable(); yellowAfterBlink.disable();
       while (blinkMode) {
-        // 모두 켜는거랑랑
+        // 모두 켜기
         analogWrite(redPin, brightness);
         analogWrite(yellowPin, brightness);
         analogWrite(greenPin, brightness);
@@ -186,8 +287,7 @@ void loop() {
         sendState();
         Serial.println("ALL_ON");
         delay(ALL_BLINK_INTERVAL);
-
-        // 모두 끄는거 반복
+        // 모두 끄기
         analogWrite(redPin, 0);
         analogWrite(yellowPin, 0);
         analogWrite(greenPin, 0);
@@ -195,98 +295,100 @@ void loop() {
         sendState();
         Serial.println("ALL_OFF");
         delay(ALL_BLINK_INTERVAL);
-
-        if (buttonPressed2) { // 또 눌리면 
+        if (buttonPressed2) {
           buttonPressed2 = false;
-          blinkMode = false; // 블링크 탈출출
+          blinkMode = false;
+          break;
+        }
+        if (Serial.available() > 0) {  // 새로운 제스처 감지 시 blinking 종료
+          blinkMode = false;
           break;
         }
       }
-    } else { // 틸츨히면 
-      analogWrite(redPin, 0);
-      analogWrite(yellowPin, 0);
-      analogWrite(greenPin, 0); // led 다 꺼버리고
-      redState = false; yellowState = false; greenState = false;
-      sendState();
-      Serial.println("realOFFF");
-      red.restartDelayed(); // 다시 신호등 시작
-    }
-  }
-
-  if (buttonPressed3) { // 3번 버튼이 눌리면면
-    buttonPressed3 = false;
-    trafficLightOn = !trafficLightOn;
-    if (trafficLightOn) {
-      sendState();
-      Serial.println("ONNNN");
-      red.restartDelayed(); // 신호등 시작!
     } else {
-      red.disable(); yellow.disable(); green.disable();
-      greenBlink.disable(); yellowAfterBlink.disable(); // 모든 task 죽여버리고
-
       analogWrite(redPin, 0);
       analogWrite(yellowPin, 0);
       analogWrite(greenPin, 0);
       redState = false; yellowState = false; greenState = false;
       sendState();
-      Serial.println("OFFWhite"); // 걍 다 끔끔
+      Serial.println("realOFFF");
+      red.restartDelayed();
     }
   }
 
-  // TaskScheduler 실행 
+  if (buttonPressed3) {
+    buttonPressed3 = false;
+    trafficLightOn = !trafficLightOn;
+    if (trafficLightOn) {
+      sendState();
+      Serial.println("ONNNN");
+      red.restartDelayed();
+    } else {
+      red.disable(); yellow.disable(); green.disable();
+      greenBlink.disable(); yellowAfterBlink.disable();
+      analogWrite(redPin, 0);
+      analogWrite(yellowPin, 0);
+      analogWrite(greenPin, 0);
+      redState = false; yellowState = false; greenState = false;
+      sendState();
+      Serial.println("OFFWhite");
+    }
+  }
+
+  // TaskScheduler 실행 (신호등 모드일 때만)
   if (!toggleMode && !blinkMode && trafficLightOn) {
-    ts.execute(); // 실행
+    ts.execute();
   }
 }
 
-// Task 콜백 함수들 (task 시작과 종료 지정정)
-bool redOE() { // 빨간불 켜기기
+// Task 콜백 함수들
+bool redOE() {
   analogWrite(redPin, brightness);
   redState = true;
   sendState();
   Serial.println("RED_ON");
   return true;
 }
-void redOD() { // 빨간불 끄기 + 노란불 시작
+void redOD() {
   analogWrite(redPin, 0);
   redState = false;
   sendState();
   Serial.println("RED_OFF");
   yellow.restartDelayed();
 }
-bool yellowOE() { // 노란불 켜기
+bool yellowOE() {
   analogWrite(yellowPin, brightness);
   yellowState = true;
   sendState();
   Serial.println("YELLOW_ON");
   return true;
 }
-void yellowOD() { // 노란불 끄기 + 초록불 시작
+void yellowOD() {
   analogWrite(yellowPin, 0);
   yellowState = false;
   sendState();
   Serial.println("YELLOW_OFF");
   green.restartDelayed();
 }
-bool greenOE() { // 초록불 켜기
+bool greenOE() {
   analogWrite(greenPin, brightness);
   greenState = true;
   sendState();
   Serial.println("GREEN_ON");
   return true;
 }
-void greenOD() { // 초록불 끄기 + 깜빡임 시작
+void greenOD() {
   analogWrite(greenPin, 0);
   greenState = false;
   sendState();
   Serial.println("GREEN_OFF");
   greenBlink.restartDelayed();
 }
-bool greenBlinkOE() { // 초록불 깜빡임 시작
+bool greenBlinkOE() {
   analogWrite(greenPin, 0);
   return true;
 }
-void greenBlinkCB() { // 초록불 깜빡깜빡
+void greenBlinkCB() {
   greenState = !greenState;
   analogWrite(greenPin, greenState ? brightness : 0);
   sendState();
@@ -296,21 +398,21 @@ void greenBlinkCB() { // 초록불 깜빡깜빡
     Serial.println("GREEN_OFF (Blink)");
   }
 }
-void greenBlinkOD() { // 초록불 깜빡임 끝 + 노란불 시작
+void greenBlinkOD() {
   analogWrite(greenPin, 0);
   greenState = false;
   sendState();
   Serial.println("GREEN_OFF (Blink End)");
   yellowAfterBlink.restartDelayed();
 }
-bool yellowOE2() { // 노란불 켜기
+bool yellowOE2() {
   analogWrite(yellowPin, brightness);
   yellowState = true;
   sendState();
   Serial.println("YELLOW_ON");
   return true;
 }
-void yellowOD2() { // 노란불 끄기 + 빨간불 시작
+void yellowOD2() {
   analogWrite(yellowPin, 0);
   yellowState = false;
   sendState();

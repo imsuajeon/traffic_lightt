@@ -122,9 +122,9 @@ p5.js에서 웹 브라우저와 Arduino 간 시리얼 통신을 가능하게 해
 
 웹캠으로 손 인식하고 Handpose 모델로 손가락 keypoint 받아오는용
 
-      image(video, camX, camY, camW, camH);
-        fill(255, 0, 0);
-        noStroke();
+image(video, camX, camY, camW, camH);
+      fill(255, 0, 0);
+      noStroke();
         
 화면에 뜨는 카메라
 
@@ -138,7 +138,7 @@ p5.js에서 웹 브라우저와 Arduino 간 시리얼 통신을 가능하게 해
   
 손 인식 결과
 
-      if (hands.length > 0 && millis() > gestureCooldown) {
+if (hands.length > 0 && millis() > gestureCooldown) {
     let newMode = detectModeGesture(hands[0]);
     if (newMode && newMode !== currentMode) {
       gestureCooldown = millis() + 2000;
@@ -148,7 +148,7 @@ p5.js에서 웹 브라우저와 Arduino 간 시리얼 통신을 가능하게 해
           }
         }
         
-  모드 변경을 위한 제스처
+모드 변경을 위한 제스처
   
   if (hands.length > 0 && millis() > sliderGestureCooldown) {
     for (let hand of hands) {
@@ -178,10 +178,10 @@ p5.js에서 웹 브라우저와 Arduino 간 시리얼 통신을 가능하게 해
         console.log("손바닥 위");                                                        // 콘솔에 로그 출력
       } 
       
-      슬라이드 제어
-      제스쳐로 슬라이더 바꿀때 100씩 바뀜
+슬라이드 제어
+제스쳐로 슬라이더 바꿀때 100씩 바뀜
       
-      function detectModeGesture(hand) {                                                      
+function detectModeGesture(hand) {                                                      
   const lm = hand.landmarks;                             // 손의 랜드마크 정보
   const isUp = (tip, dip) => lm[tip][1] < lm[dip][1];    // 손가락이 펴져있는지 확인하는 함수
   const idx = isUp(8, 6), mid = isUp(12, 10), rng = isUp(16, 14), pink = isUp(20, 18);  // 각 손가락의 상태를 저장

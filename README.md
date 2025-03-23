@@ -1,3 +1,245 @@
+### 수아의 우당탕탕 신호등!
+---
+##### 이번주 수아의 유튭:
+
+
+---
+##### 아두이노 추가 코드
+else if (line.startsWith("MODE:")) {              // 모드 변경
+      String modeCmd = line.substring(5);
+      modeCmd.trim();
+      currentMode = modeCmd;
+      Serial.print("Mode received: ");
+      Serial.println(modeCmd);
+      
+      // p5.js에 모드 업데이트를 위한 메시지 전송
+      Serial.print("MODE ");
+      Serial.println(currentMode);
+      
+      if (modeCmd == "NORMAL") {
+        trafficLightOn = true;
+        toggleMode = false;
+        blinkMode = false;
+        red.restartDelayed();
+        Serial.println("Switched to NORMAL mode.");
+      }
+      else if (modeCmd == "EMERGENCY") {
+        trafficLightOn = false;
+        toggleMode = true;
+        blinkMode = false;
+        red.disable();
+        yellow.disable();
+        green.disable();
+        greenBlink.disable();
+        yellowAfterBlink.disable();
+        analogWrite(redPin, brightness);
+        analogWrite(yellowPin, 0);
+        analogWrite(greenPin, 0);
+        redState = true;
+        yellowState = false;
+        greenState = false;
+        sendState();
+        Serial.print("MODE ");
+        Serial.println(currentMode);  
+        Serial.println("Manual Mode: RED_ON, YELLOW_OFF, GREEN_OFF");
+      }
+      else if (modeCmd == "BLINKING") {
+        trafficLightOn = false;
+        blinkMode = true;
+        red.disable();
+        yellow.disable();
+        green.disable();
+        greenBlink.disable();
+        yellowAfterBlink.disable();
+        Serial.println("Switched to BLINKING mode.");
+        // blinking 모드 처리는 비차단 방식으로 개선하는 것이 좋습니다.
+        while (blinkMode) {
+          analogWrite(redPin, brightness);
+          analogWrite(yellowPin, brightness);
+          analogWrite(greenPin, brightness);
+          redState = true;
+          yellowState = true;
+          greenState = true;
+          sendState();
+          Serial.println("ALL_ON");
+          delay(ALL_BLINK_INTERVAL);
+          if (Serial.available() > 0) {
+            blinkMode = false;
+            break;
+          }
+          analogWrite(redPin, 0);
+          analogWrite(yellowPin, 0);
+          analogWrite(greenPin, 0);
+          redState = false;
+          yellowState = false;
+          greenState = false;
+          sendState();
+          Serial.println("ALL_OFF");
+          delay(ALL_BLINK_INTERVAL);
+          if (Serial.available() > 0) {
+            blinkMode = false;
+            break;
+          }
+        }
+        Serial.println("Exiting BLINKING mode.");
+      }
+      else if (modeCmd == "ON_OFF") {
+        trafficLightOn = false;
+        red.disable();
+        yellow.disable();
+        green.disable();
+        greenBlink.disable();
+        yellowAfterBlink.disable();
+        analogWrite(redPin, 0);
+        analogWrite(yellowPin, 0);
+        analogWrite(greenPin, 0);
+        redState = false;
+        yellowState = false;
+        greenState = false;
+        sendState();
+        Serial.print("MODE ");
+        Serial.println(currentMode);  // 버튼처럼 모드 메시지 재전송
+        Serial.println("Switched to OFF mode.");
+      }
+    }
+시리얼 명령어로 모드 변경을 처리하는 코드를 추가했으며 MODE:로 시작하는 문자열이 있으면 모드 변경을 실시한다. 모드벼 처리하는 조건문을 추가했다. 사실 그전 코드 그대로 갖고와서 시리얼 명령어만 바꿨다. (핸드포즈에서 시리얼 보내면 여기를 거쳐서 모드가 결정된다.)
+
+---
+##### html 추가코드
+    <script src="https://unpkg.com/@gohai/p5.webserial@^1/libraries/p5.webserial.js"></script>
+    <script src="https://unpkg.com/ml5@0.6.0/dist/ml5.min.js"></script>
+p5.js에서 웹 브라우저와 Arduino 간 시리얼 통신을 가능하게 해주는 라이브러리와 웹에서 머신러닝을 쉽게 사용할 수 있도록 만든 고수준 라이브러리 추가
+
+---
+##### P5 추가 코드
+let handPose;
+let video;
+let hands = [];
+
+video = createCapture(VIDEO, { flipped: true });
+handPose = ml5.handpose(video, modelReady);
+handPose.on("predict", gotHands);
+웹캠으로 손 인식하고 Handpose 모델로 손가락 keypoint 받아오는용
+
+image(video, camX, camY, camW, camH);
+  fill(255, 0, 0);
+  noStroke();
+화면에 뜨는 카메라
+
+  for (let i = 0; i < hands.length; i++) {
+    for (let [xVal, yVal] of hands[i].landmarks) {
+      let flippedX = camX + (video.width - xVal);
+      let drawY = camY + yVal;
+      circle(flippedX, drawY, 10);
+    }
+  }
+손 인식 결과
+
+if (hands.length > 0 && millis() > gestureCooldown) {
+    let newMode = detectModeGesture(hands[0]);
+    if (newMode && newMode !== currentMode) {
+      gestureCooldown = millis() + 2000;
+      currentMode = newMode;
+      sendModeCommandMode(newMode);
+      console.log("Mode changed via gesture:", newMode);
+    }
+  }
+  모드 변경을 위한 제스처
+  if (hands.length > 0 && millis() > sliderGestureCooldown) {
+    for (let hand of hands) {
+      
+      if (isThumbandIndexExtended(hand)) {                                              // 엄지 검지 위로 피면
+        let val = max(redSlider.value() - 100, parseInt(redSlider.elt.min));            // 빨간색 시간을 줄임
+        redSlider.value(val); sendRedTime(); 
+        console.log("엄지검지 위");  
+      }else if (isPalmDown(hand)) {                                                    // 손바닥을 아래로 내리면 
+        let val = max(greenSlider.value() - 100, parseInt(greenSlider.elt.min));        // 초록색 시간을 줄임
+        greenSlider.value(val); sendGreenTime();                                    
+        console.log("손바닥 아래");                               
+      } else if (isThumbExtended(hand)) {                                               // 엄지만 올리면
+        let val = min(yellowSlider.value() + 100, parseInt(yellowSlider.elt.max));      // 노란색 시간을 늘림
+        yellowSlider.value(val); sendYellowTime();                              
+        console.log("엄지 위");
+      } else if (isThumbDown(hand)) {                                                   // 엄지만 내리면                 
+        let val = max(yellowSlider.value() - 100, parseInt(yellowSlider.elt.min));      // 노란색 시간을 줄임
+        yellowSlider.value(val); sendYellowTime();
+        console.log("엄지 아래");
+      } else if (isIndexandPinkyExtended(hand)) {                                       // 검지와 새끼만 올리면
+        let val = min(redSlider.value() + 100, parseInt(redSlider.elt.max));            // 빨간색 시간을 늘림
+        redSlider.value(val); sendRedTime();
+        console.log("검지 새끼 위");
+      } else if (isPalmUp(hand)) {                                                       // 손바닥을 위로 올리면
+        let val = min(greenSlider.value() + 100, parseInt(greenSlider.elt.max));        // 초록색 시간을 늘림
+        greenSlider.value(val); sendGreenTime();                                        // 시리얼로 전송      
+        console.log("손바닥 위");                                                        // 콘솔에 로그 출력
+      } 
+      슬라이드 제어
+
+      제스쳐로 슬라이더 바꿀때 100씩 바뀜
+      
+function detectModeGesture(hand) {                                                      
+  const lm = hand.landmarks;                                                            // 손의 랜드마크 정보
+  const isUp = (tip, dip) => lm[tip][1] < lm[dip][1];                                   // 손가락이 펴져있는지 확인하는 함수
+  const idx = isUp(8, 6), mid = isUp(12, 10), rng = isUp(16, 14), pink = isUp(20, 18);  // 각 손가락의 상태를 저장
+  if (!idx && !mid && !rng && !pink) return "NORMAL";                                   // 모든 손가락이 접혀있으면 NORMAL
+  if (idx && !mid && !rng && !pink) return "EMERGENCY";                                 // 검지만 펴져있으면 EMERGENCY
+  if (idx && mid && !rng && !pink) return "BLINKING";                                   // 검지와 중지만 펴져있으면 BLINKING
+  if (idx && mid && rng && !pink) return "ON_OFF";                                      // 검지, 중지, 약지가 펴져있으면 ON_OFF
+  return null;
+}
+모드 제스처 인식 함수
+function isIndexandPinkyExtended(hand) {                                                // 검지와 새끼 위로로 핀 함수      
+  let lm = hand.landmarks;
+  return (lm[8][1] < lm[6][1] && lm[12][1] > lm[10][1] && lm[16][1] > lm[14][1] && lm[20][1] < lm[18][1]);
+}
+function isThumbandIndexExtended(hand) {                                                    // 검지와 새끼 아래로 핀 함수
+  let lm = hand.landmarks;
+  return (lm[16][1] > lm[14][1] && lm[12][1] > lm[10][1] && lm[8][1] < lm[6][1] && lm[20][1] > lm[18][1] && lm[4][1] < lm[3][1]);
+}
+function isThumbExtended(hand) {                                                        // 엄지 위로 핀 함수
+  let lm = hand.landmarks;
+  return (lm[4][1] < lm[3][1] && lm[8][1] > lm[6][1] && lm[12][1] > lm[10][1] && lm[16][1] > lm[14][1] && lm[20][1] < lm[18][1]);
+}
+function isThumbDown(hand) {                                                            // 엄지 아래로 핀 함수
+  let lm = hand.landmarks;
+  return lm[4][1] > lm[3][1];
+}
+function isPalmUp(hand) {                                                               // 손바닥 위로
+  let lm = hand.landmarks;
+  return (lm[4][1] < lm[3][1] && lm[8][1] < lm[6][1] && lm[12][1] < lm[10][1] && lm[16][1] < lm[14][1] && lm[20][1] < lm[18][1]);
+}
+function isPalmDown(hand) {                                                             // 손바닥 아래로
+  let lm = hand.landmarks;
+  return (lm[4][1] > lm[3][1] && lm[8][1] > lm[6][1] && lm[12][1] > lm[10][1] && lm[16][1] > lm[14][1] && lm[20][1] > lm[18][1]);
+}
+슬라이더 제스쳐 인식 함수
+
+---
+##### 제스쳐 설명
+![image](https://github.com/user-attachments/assets/6052f0a7-fffe-4c73-a3a5-c9e54a49f5a2)
+신호등모드
+![image](https://github.com/user-attachments/assets/2066722f-f9ba-44cc-b0de-ab7ef4818223)
+Emergency 모드
+![image](https://github.com/user-attachments/assets/b229b472-6ade-4e6f-99e0-e3e64b84b33a)
+blink 모드
+![image](https://github.com/user-attachments/assets/0f05ebf9-d709-493d-a539-d87d168cc07c)
+On/Off
+![image](https://github.com/user-attachments/assets/bcbfe236-c07f-4dd4-9c12-5bef495b6ed5)
+빨간색 주기 늘리기
+![image](https://github.com/user-attachments/assets/1fe68d2f-0dbf-410e-b71f-e8aa42756b2c)
+빨간색 주기 줄이기
+![image](https://github.com/user-attachments/assets/fd643ebc-d9fb-4ad1-bec4-53c72e4224cc)
+노란색 주기 늘리기
+![image](https://github.com/user-attachments/assets/9d9c7782-63a3-4dd2-9c54-67ca8106d2eb)
+노란색 주기 줄이기
+![image](https://github.com/user-attachments/assets/847cead4-aea4-4341-a5a2-0312daec9453)
+초록색 주기 늘리기
+![image](https://github.com/user-attachments/assets/e9769e9e-9313-4250-b357-4c93b263c1ce)
+초록색 주기 줄이기
+
+---
+
+
 ### 수아의 얼렁뚱땅 신호등!
 ---
 ##### 수아의 유튭:

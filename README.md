@@ -228,27 +228,11 @@ function detectModeGesture(hand) {
 ##### 제스쳐 설명
 |![image](https://github.com/user-attachments/assets/6052f0a7-fffe-4c73-a3a5-c9e54a49f5a2)|![image](https://github.com/user-attachments/assets/2066722f-f9ba-44cc-b0de-ab7ef4818223)|![image](https://github.com/user-attachments/assets/b229b472-6ade-4e6f-99e0-e3e64b84b33a)|![image](https://github.com/user-attachments/assets/0f05ebf9-d709-493d-a539-d87d168cc07c)|
 |----------------------------|-------------------------------|-----------------------------|-------------------------------------|
-|신호등모드|Emergency 모드|blink 모드|On/Off
+|신호등모드|Emergency 모드|blink 모드|On/Off|
 
-신호등모드
-
-Emergency 모드
-
-blink 모드
-![image](https://github.com/user-attachments/assets/0f05ebf9-d709-493d-a539-d87d168cc07c)
-On/Off
-![image](https://github.com/user-attachments/assets/bcbfe236-c07f-4dd4-9c12-5bef495b6ed5)
-빨간색 주기 늘리기
-![image](https://github.com/user-attachments/assets/1fe68d2f-0dbf-410e-b71f-e8aa42756b2c)
-빨간색 주기 줄이기
-![image](https://github.com/user-attachments/assets/fd643ebc-d9fb-4ad1-bec4-53c72e4224cc)
-노란색 주기 늘리기
-![image](https://github.com/user-attachments/assets/9d9c7782-63a3-4dd2-9c54-67ca8106d2eb)
-노란색 주기 줄이기
-![image](https://github.com/user-attachments/assets/847cead4-aea4-4341-a5a2-0312daec9453)
-초록색 주기 늘리기
-![image](https://github.com/user-attachments/assets/e9769e9e-9313-4250-b357-4c93b263c1ce)
-초록색 주기 줄이기
+|![image](https://github.com/user-attachments/assets/bcbfe236-c07f-4dd4-9c12-5bef495b6ed5)|![image](https://github.com/user-attachments/assets/1fe68d2f-0dbf-410e-b71f-e8aa42756b2c)|![image](https://github.com/user-attachments/assets/fd643ebc-d9fb-4ad1-bec4-53c72e4224cc)|![image](https://github.com/user-attachments/assets/9d9c7782-63a3-4dd2-9c54-67ca8106d2eb)|![image](https://github.com/user-attachments/assets/847cead4-aea4-4341-a5a2-0312daec9453)|![image](https://github.com/user-attachments/assets/e9769e9e-9313-4250-b357-4c93b263c1ce)|
+|------------------|-----------------|----------------|------------------|------------------|---------------------|
+|빨간색 주기 늘리기|빨간색 주기 줄이기|노란색 주기 늘리기|노란색 주기 줄이기|초록색 주기 늘리기|초록색 주기 줄이기
 
 ---
 
